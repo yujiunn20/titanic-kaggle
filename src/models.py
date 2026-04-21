@@ -13,6 +13,19 @@ def build_random_forest_model(random_state=42):
     )
 
 
+def build_random_forest_tuned_model(random_state=42):
+    """Create a regularized Random Forest model."""
+    return RandomForestClassifier(
+        n_estimators=500,
+        max_depth=5,
+        min_samples_split=6,
+        min_samples_leaf=3,
+        max_features="sqrt",
+        class_weight="balanced",
+        random_state=random_state,
+    )
+
+
 def build_lightgbm_model(random_state=42):
     """Create a LightGBM classifier."""
     from lightgbm import LGBMClassifier
@@ -21,6 +34,25 @@ def build_lightgbm_model(random_state=42):
         n_estimators=300,
         learning_rate=0.03,
         num_leaves=31,
+        random_state=random_state,
+        verbose=-1,
+    )
+
+
+def build_lightgbm_tuned_model(random_state=42):
+    """Create a regularized LightGBM classifier."""
+    from lightgbm import LGBMClassifier
+
+    return LGBMClassifier(
+        n_estimators=200,
+        learning_rate=0.025,
+        num_leaves=8,
+        max_depth=3,
+        min_child_samples=12,
+        subsample=0.85,
+        colsample_bytree=0.85,
+        reg_alpha=0.1,
+        reg_lambda=1.0,
         random_state=random_state,
         verbose=-1,
     )
@@ -36,6 +68,25 @@ def build_xgboost_model(random_state=42):
         max_depth=3,
         subsample=0.8,
         colsample_bytree=0.8,
+        eval_metric="logloss",
+        random_state=random_state,
+    )
+
+
+def build_xgboost_tuned_model(random_state=42):
+    """Create a regularized XGBoost classifier."""
+    from xgboost import XGBClassifier
+
+    return XGBClassifier(
+        n_estimators=250,
+        learning_rate=0.025,
+        max_depth=3,
+        min_child_weight=2,
+        subsample=0.85,
+        colsample_bytree=0.85,
+        gamma=0.1,
+        reg_alpha=0.05,
+        reg_lambda=1.5,
         eval_metric="logloss",
         random_state=random_state,
     )
@@ -92,10 +143,16 @@ MODEL_BUILDERS = {
     "random_forest": build_random_forest_model,
     "randomforest": build_random_forest_model,
     "rf": build_random_forest_model,
+    "random_forest_tuned": build_random_forest_tuned_model,
+    "rf_tuned": build_random_forest_tuned_model,
     "lightgbm": build_lightgbm_model,
     "lgbm": build_lightgbm_model,
+    "lightgbm_tuned": build_lightgbm_tuned_model,
+    "lgbm_tuned": build_lightgbm_tuned_model,
     "xgboost": build_xgboost_model,
     "xgb": build_xgboost_model,
+    "xgboost_tuned": build_xgboost_tuned_model,
+    "xgb_tuned": build_xgboost_tuned_model,
     "mlp": build_mlp_model,
     "logistic": build_logistic_model,
     "logistic_regression": build_logistic_model,
