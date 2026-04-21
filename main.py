@@ -1,41 +1,24 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from src.data_loader import load_titanic_data
+from src.evaluation import evaluate_accuracy
+from src.features import prepare_features
+from src.models import build_random_forest_model
+from src.submission import create_submission
+from src.trainer import train_with_validation
 
-train = pd.read_csv("data/raw/train.csv")
-test = pd.read_csv("data/raw/test.csv")
 
-features = ["Pclass", "Sex", "SibSp", "Parch", "Fare", "Age"]
+def main():
+    train, test = load_titanic_data()
+    X, y, X_test = prepare_features(train, test)
 
-train["Age"] = train["Age"].fillna(train["Age"].median())
-test["Age"] = test["Age"].fillna(test["Age"].median())
-test["Fare"] = test["Fare"].fillna(test["Fare"].median())
+    model = build_random_forest_model()
+    model, X_valid, y_valid = train_with_validation(model, X, y)
 
-train["Sex"] = train["Sex"].map({"male": 0, "female": 1})
-test["Sex"] = test["Sex"].map({"male": 0, "female": 1})
+    acc = evaluate_accuracy(model, X_valid, y_valid)
+    print("Validation Accuracy:", acc)
 
-X = train[features]
-y = train["Survived"]
-X_test = test[features]
+    create_submission(model, X_test, test)
+    print("submission.csv saved")
 
-X_train, X_valid, y_train, y_valid = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
 
-model = RandomForestClassifier(random_state=42)
-model.fit(X_train, y_train)
-
-preds = model.predict(X_valid)
-acc = accuracy_score(y_valid, preds)
-print("Validation Accuracy:", acc)
-
-test_preds = model.predict(X_test)
-
-submission = pd.DataFrame({
-    "PassengerId": test["PassengerId"],
-    "Survived": test_preds
-})
-
-submission.to_csv("submission.csv", index=False)
-print("submission.csv saved")
+if __name__ == "__main__":
+    main()
